@@ -1,6 +1,19 @@
 #!/bin/bash
 
-FILES=$(lsof -M -n -p $(pidof plugin-container | tr ' ' ',') | fgrep '/tmp/Flash' | sed 's?\([0-9]\)[a-zA-Z]?\1?g' | awk '{ printf "/proc/%s/fd/%s ",$2,$4; }')
-echo $FILES
+LSOF_INFO=$(lsof -M -n -p $(pidof plugin-container | tr ' ' ',') | fgrep '/tmp/Flash')
+if [ -z "$LSOF_INFO" ]
+then
+  LSOF_INFO=$(lsof -M -n -p $(pidof pluginloader.exe | tr ' ' ',') | fgrep '/Temp/')
+fi
+PID=$(echo $LSOF_INFO | awk '{ print $2 }' | sort -u)
+FD=$(echo $LSOF_INFO | egrep -o "[0-9]+[urw]" | tr -d urw)
+
+FILES=$(echo "$LSOF_INFO" | awk '{ print $2 ":" $4 }' | tr -d urw | sed 's?\([0-9]\+\):\([0-9]\+\)?/proc/\1/fd/\2?g' )
+
+#echo "LSOF:'$LSOF_INFO'"
+#echo "PID:'$PID'"
+#echo "FD:'${FD}'"
+echo "FILES:'${FILES}'"
+#echo "File: /proc/$PID/fd/$FD"
+#vlc /proc/$PID/fd/$FD
 vlc $FILES
-exit $?
