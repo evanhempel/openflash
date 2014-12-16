@@ -1,0 +1,11 @@
+#!/bin/bash
+
+LSOF_INFO=$(lsof -M -n -p $(pidof plugin-container | tr ' ' ',') | fgrep '/tmp/Flash')
+PID=$(echo $LSOF_INFO | grep -o "[0-9]* *$USER" | cut -f1 -d' ')
+FD=$(echo $LSOF_INFO | egrep -o "[0-9]+[uwr]" | tr -d uwr)
+
+#echo LSOF: $LSOF_INFO
+#echo PID: $PID
+#echo FD: ${FD}
+echo File: /proc/$PID/fd/$FD
+vlc /proc/$PID/fd/$FD
