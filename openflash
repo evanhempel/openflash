@@ -4,8 +4,11 @@
 LSOF_INFO=$(lsof -M -n -p $(pidof plugin-container pluginloader.exe | tr ' ' ',') | egrep '/tmp/Flash|/Temp/')
 
 #       echo our FD info    strip rwu after FD               map to /proc names
-FILES=$(echo "$LSOF_INFO" | sed 's?\([0-9]\)[a-zA-Z]?\1?g' | awk '{ printf "/proc/%s/fd/%s ",$2,$4; }')
+FILES=$(echo "$LSOF_INFO" | sed 's?\([0-9]\)[a-zA-Z]?\1?g' | awk '{ printf "/proc/%s/fd/%s ",$2,$4; }' | xargs ls)
 
 echo "FILES:'${FILES}'"
-vlc $FILES
+if [ -n "$FILES" ]
+then
+  vlc $FILES
+fi
 exit $?
